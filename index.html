@@ -26,6 +26,7 @@
             width: 100%;
             height: 100%;
             touch-action: none;
+            outline: none; /* Rimuove il contorno quando è a fuoco */
         }
 
         #virtual-keyboard {
@@ -88,6 +89,7 @@
             }).catch((error) => {
                 console.error("Failed to load SWF:", error);
             });
+            container.focus();  // Imposta il focus su flash-container
         });
 
         function simulateKeyEvent(type, keyCode) {
@@ -104,51 +106,28 @@
         window.onload = function() {
             console.log("Window loaded, initializing event listeners");
 
+            const flashContainer = document.getElementById("flash-container");
+
             const arrowUp = document.getElementById("arrow-up");
             const arrowLeft = document.getElementById("arrow-left");
             const arrowRight = document.getElementById("arrow-right");
             const arrowDown = document.getElementById("arrow-down");
-            const flashContainer = document.getElementById("flash-container");
 
             function refocusGame() {
-                flashContainer.focus();
+                flashContainer.focus(); // Ripristina il focus
+                console.log("Focus set to flash-container");
             }
 
-            arrowUp.addEventListener("touchstart", () => {
-                simulateKeyEvent('keydown', 38);
-                refocusGame();
-            });
-            arrowUp.addEventListener("touchend", () => {
-                simulateKeyEvent('keyup', 38);
-                refocusGame();
-            });
+            function handleVirtualKeyPress(keyCode) {
+                refocusGame(); // Assicura che il gioco abbia il focus
+                simulateKeyEvent('keydown', keyCode);
+                setTimeout(() => simulateKeyEvent('keyup', keyCode), 100); // Simula il rilascio del tasto
+            }
 
-            arrowLeft.addEventListener("touchstart", () => {
-                simulateKeyEvent('keydown', 37);
-                refocusGame();
-            });
-            arrowLeft.addEventListener("touchend", () => {
-                simulateKeyEvent('keyup', 37);
-                refocusGame();
-            });
-
-            arrowRight.addEventListener("touchstart", () => {
-                simulateKeyEvent('keydown', 39);
-                refocusGame();
-            });
-            arrowRight.addEventListener("touchend", () => {
-                simulateKeyEvent('keyup', 39);
-                refocusGame();
-            });
-
-            arrowDown.addEventListener("touchstart", () => {
-                simulateKeyEvent('keydown', 40);
-                refocusGame();
-            });
-            arrowDown.addEventListener("touchend", () => {
-                simulateKeyEvent('keyup', 40);
-                refocusGame();
-            });
+            arrowUp.addEventListener("touchstart", () => handleVirtualKeyPress(38));
+            arrowLeft.addEventListener("touchstart", () => handleVirtualKeyPress(37));
+            arrowRight.addEventListener("touchstart", () => handleVirtualKeyPress(39));
+            arrowDown.addEventListener("touchstart", () => handleVirtualKeyPress(40));
 
             flashContainer.addEventListener("pointerdown", function(e) {
                 e.preventDefault();
@@ -161,15 +140,13 @@
                 e.preventDefault();
                 console.log("Pointer move:", e.clientX, e.clientY);
                 simulateMouseEvent(e, "mousemove");
-                refocusGame();
             }, false);
 
             flashContainer.addEventListener("pointerup", function(e) {
                 e.preventDefault();
                 console.log("Pointer up:", e.clientX, e.clientY);
                 simulateMouseEvent(e, "mouseup");
-                simulateMouseEvent(e, "click"); 
-                refocusGame();
+                simulateMouseEvent(e, "click");
             }, false);
 
             function simulateMouseEvent(event, eventType) {
@@ -180,7 +157,7 @@
                     view: window,
                     clientX: event.clientX,
                     clientY: event.clientY,
-                    button: 0 
+                    button: 0
                 });
                 document.elementFromPoint(event.clientX, event.clientY).dispatchEvent(simulatedEvent);
             }
