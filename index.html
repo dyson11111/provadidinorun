@@ -115,28 +115,44 @@
 
             const flashContainer = document.getElementById("flash-container");
 
-            // Utilizzo dei pointer events per gestire il tocco
-            flashContainer.addEventListener("pointerdown", function(e) {
+            flashContainer.addEventListener("touchstart", function(e) {
                 e.preventDefault();
-                simulateMouseEvent(e, "mousedown");
+                simulateMouseEvent(e.changedTouches[0], "mousedown");
             }, false);
 
-            flashContainer.addEventListener("pointermove", function(e) {
+            flashContainer.addEventListener("touchmove", function(e) {
                 e.preventDefault();
-                simulateMouseEvent(e, "mousemove");
+                simulateMouseEvent(e.changedTouches[0], "mousemove");
             }, false);
 
-            flashContainer.addEventListener("pointerup", function(e) {
+            flashContainer.addEventListener("touchend", function(e) {
                 e.preventDefault();
-                simulateMouseEvent(e, "mouseup");
-                simulateMouseEvent(e, "click"); // Simula il click al rilascio
+                simulateMouseEvent(e.changedTouches[0], "mouseup");
+                simulateMouseEvent(e.changedTouches[0], "click"); // Assicura che il click venga registrato
             }, false);
 
-            function simulateMouseEvent(event, eventType) {
-                const simulatedEvent = new MouseEvent(eventType, {
+            function simulateMouseEvent(touch, eventType) {
+                const event = new MouseEvent(eventType, {
                     bubbles: true,
                     cancelable: true,
                     view: window,
-                    clientX: event.clientX,
-                    clientY: event.clientY,
-                    button: 0 // Simula il click sin
+                    clientX: touch.clientX,
+                    clientY: touch.clientY,
+                    button: 0 // Simula il click sinistro del mouse
+                });
+                document.elementFromPoint(touch.clientX, touch.clientY).dispatchEvent(event);
+            }
+        };
+    </script>
+</head>
+<body>
+    <div id="flash-container"></div>
+
+    <div id="virtual-keyboard">
+        <div id="arrow-left" class="arrow-key">←</div>
+        <div id="arrow-up" class="arrow-key">↑</div>
+        <div id="arrow-down" class="arrow-key">↓</div>
+        <div id="arrow-right" class="arrow-key">→</div>
+    </div>
+</body>
+</html>
