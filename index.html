@@ -25,7 +25,7 @@
             align-items: center;
             width: 100%;
             height: 100%;
-            touch-action: none;
+            touch-action: none; /* Disabilita il comportamento di default del browser per il tocco */
         }
 
         #virtual-keyboard {
@@ -95,27 +95,6 @@
             document.dispatchEvent(event);
         }
 
-        function convertTouchToMouseEvent(type, touch) {
-            const simulatedEvent = new MouseEvent(type, {
-                bubbles: true,
-                cancelable: true,
-                view: window,
-                detail: 1,
-                screenX: touch.screenX,
-                screenY: touch.screenY,
-                clientX: touch.clientX,
-                clientY: touch.clientY,
-                ctrlKey: false,
-                altKey: false,
-                shiftKey: false,
-                metaKey: false,
-                button: 0,
-                relatedTarget: null
-            });
-
-            touch.target.dispatchEvent(simulatedEvent);
-        }
-
         window.onload = function() {
             const arrowUp = document.getElementById("arrow-up");
             const arrowLeft = document.getElementById("arrow-left");
@@ -138,22 +117,31 @@
 
             flashContainer.addEventListener("touchstart", function(e) {
                 e.preventDefault();
-                const touch = e.changedTouches[0];
-                convertTouchToMouseEvent("mousedown", touch);
+                simulateMouseEvent(e.changedTouches[0], "mousedown");
             }, false);
 
             flashContainer.addEventListener("touchmove", function(e) {
                 e.preventDefault();
-                const touch = e.changedTouches[0];
-                convertTouchToMouseEvent("mousemove", touch);
+                simulateMouseEvent(e.changedTouches[0], "mousemove");
             }, false);
 
             flashContainer.addEventListener("touchend", function(e) {
                 e.preventDefault();
-                const touch = e.changedTouches[0];
-                convertTouchToMouseEvent("mouseup", touch);
-                convertTouchToMouseEvent("click", touch); // Simula il click al rilascio
+                simulateMouseEvent(e.changedTouches[0], "mouseup");
+                simulateMouseEvent(e.changedTouches[0], "click"); // Assicura che il click venga registrato
             }, false);
+
+            function simulateMouseEvent(touch, eventType) {
+                const event = new MouseEvent(eventType, {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                    clientX: touch.clientX,
+                    clientY: touch.clientY,
+                    button: 0 // Simula il click sinistro del mouse
+                });
+                document.elementFromPoint(touch.clientX, touch.clientY).dispatchEvent(event);
+            }
         };
     </script>
 </head>
