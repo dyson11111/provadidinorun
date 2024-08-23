@@ -25,7 +25,7 @@
             align-items: center;
             width: 100%;
             height: 100%;
-            touch-action: none; /* Previene il comportamento di default del browser sul tocco */
+            touch-action: none;
         }
 
         #virtual-keyboard {
@@ -137,7 +137,7 @@
             const flashContainer = document.getElementById("flash-container");
 
             flashContainer.addEventListener("touchstart", function(e) {
-                e.preventDefault(); // Previene il comportamento di default del browser
+                e.preventDefault();
                 const touch = e.changedTouches[0];
                 convertTouchToMouseEvent("mousedown", touch);
             }, false);
@@ -152,6 +152,7 @@
                 e.preventDefault();
                 const touch = e.changedTouches[0];
                 convertTouchToMouseEvent("mouseup", touch);
+                convertTouchToMouseEvent("click", touch); // Simula il click al rilascio
             }, false);
         };
     </script>
