@@ -115,44 +115,28 @@
 
             const flashContainer = document.getElementById("flash-container");
 
-            flashContainer.addEventListener("touchstart", function(e) {
+            // Utilizzo dei pointer events per gestire il tocco
+            flashContainer.addEventListener("pointerdown", function(e) {
                 e.preventDefault();
-                simulateMouseEvent(e.changedTouches[0], "mousedown");
+                simulateMouseEvent(e, "mousedown");
             }, false);
 
-            flashContainer.addEventListener("touchmove", function(e) {
+            flashContainer.addEventListener("pointermove", function(e) {
                 e.preventDefault();
-                simulateMouseEvent(e.changedTouches[0], "mousemove");
+                simulateMouseEvent(e, "mousemove");
             }, false);
 
-            flashContainer.addEventListener("touchend", function(e) {
+            flashContainer.addEventListener("pointerup", function(e) {
                 e.preventDefault();
-                simulateMouseEvent(e.changedTouches[0], "mouseup");
-                simulateMouseEvent(e.changedTouches[0], "click"); // Assicura che il click venga registrato
+                simulateMouseEvent(e, "mouseup");
+                simulateMouseEvent(e, "click"); // Simula il click al rilascio
             }, false);
 
-            function simulateMouseEvent(touch, eventType) {
-                const event = new MouseEvent(eventType, {
+            function simulateMouseEvent(event, eventType) {
+                const simulatedEvent = new MouseEvent(eventType, {
                     bubbles: true,
                     cancelable: true,
                     view: window,
-                    clientX: touch.clientX,
-                    clientY: touch.clientY,
-                    button: 0 // Simula il click sinistro del mouse
-                });
-                document.elementFromPoint(touch.clientX, touch.clientY).dispatchEvent(event);
-            }
-        };
-    </script>
-</head>
-<body>
-    <div id="flash-container"></div>
-
-    <div id="virtual-keyboard">
-        <div id="arrow-left" class="arrow-key">←</div>
-        <div id="arrow-up" class="arrow-key">↑</div>
-        <div id="arrow-down" class="arrow-key">↓</div>
-        <div id="arrow-right" class="arrow-key">→</div>
-    </div>
-</body>
-</html>
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    button: 0 // Simula il click sin
