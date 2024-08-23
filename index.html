@@ -25,7 +25,7 @@
             align-items: center;
             width: 100%;
             height: 100%;
-            touch-action: none; /* Disabilita il comportamento di default del browser per il tocco */
+            touch-action: none;
         }
 
         #virtual-keyboard {
@@ -78,14 +78,20 @@
     <script>
         window.RufflePlayer = window.RufflePlayer || {};
         window.addEventListener("DOMContentLoaded", () => {
+            console.log("DOM fully loaded and parsed");
             const ruffle = window.RufflePlayer.newest();
             const player = ruffle.createPlayer();
             const container = document.getElementById("flash-container");
             container.appendChild(player);
-            player.load("dinorun.swf");
+            player.load("dinorun.swf").then(() => {
+                console.log("SWF loaded successfully");
+            }).catch((error) => {
+                console.error("Failed to load SWF:", error);
+            });
         });
 
         function simulateKeyEvent(type, keyCode) {
+            console.log(`Simulating ${type} event for keyCode ${keyCode}`);
             const event = new KeyboardEvent(type, {
                 keyCode: keyCode,
                 which: keyCode,
@@ -96,57 +102,93 @@
         }
 
         window.onload = function() {
+            console.log("Window loaded, initializing event listeners");
+
             const arrowUp = document.getElementById("arrow-up");
             const arrowLeft = document.getElementById("arrow-left");
             const arrowRight = document.getElementById("arrow-right");
             const arrowDown = document.getElementById("arrow-down");
-
-            arrowUp.addEventListener("touchstart", () => simulateKeyEvent('keydown', 38));
-            arrowUp.addEventListener("touchend", () => simulateKeyEvent('keyup', 38));
-
-            arrowLeft.addEventListener("touchstart", () => simulateKeyEvent('keydown', 37));
-            arrowLeft.addEventListener("touchend", () => simulateKeyEvent('keyup', 37));
-
-            arrowRight.addEventListener("touchstart", () => simulateKeyEvent('keydown', 39));
-            arrowRight.addEventListener("touchend", () => simulateKeyEvent('keyup', 39));
-
-            arrowDown.addEventListener("touchstart", () => simulateKeyEvent('keydown', 40));
-            arrowDown.addEventListener("touchend", () => simulateKeyEvent('keyup', 40));
-
             const flashContainer = document.getElementById("flash-container");
 
-            flashContainer.addEventListener("touchstart", function(e) {
+            function refocusGame() {
+                flashContainer.focus();
+            }
+
+            arrowUp.addEventListener("touchstart", () => {
+                simulateKeyEvent('keydown', 38);
+                refocusGame();
+            });
+            arrowUp.addEventListener("touchend", () => {
+                simulateKeyEvent('keyup', 38);
+                refocusGame();
+            });
+
+            arrowLeft.addEventListener("touchstart", () => {
+                simulateKeyEvent('keydown', 37);
+                refocusGame();
+            });
+            arrowLeft.addEventListener("touchend", () => {
+                simulateKeyEvent('keyup', 37);
+                refocusGame();
+            });
+
+            arrowRight.addEventListener("touchstart", () => {
+                simulateKeyEvent('keydown', 39);
+                refocusGame();
+            });
+            arrowRight.addEventListener("touchend", () => {
+                simulateKeyEvent('keyup', 39);
+                refocusGame();
+            });
+
+            arrowDown.addEventListener("touchstart", () => {
+                simulateKeyEvent('keydown', 40);
+                refocusGame();
+            });
+            arrowDown.addEventListener("touchend", () => {
+                simulateKeyEvent('keyup', 40);
+                refocusGame();
+            });
+
+            flashContainer.addEventListener("pointerdown", function(e) {
                 e.preventDefault();
-                simulateMouseEvent(e.changedTouches[0], "mousedown");
+                console.log("Pointer down:", e.clientX, e.clientY);
+                simulateMouseEvent(e, "mousedown");
+                refocusGame();
             }, false);
 
-            flashContainer.addEventListener("touchmove", function(e) {
+            flashContainer.addEventListener("pointermove", function(e) {
                 e.preventDefault();
-                simulateMouseEvent(e.changedTouches[0], "mousemove");
+                console.log("Pointer move:", e.clientX, e.clientY);
+                simulateMouseEvent(e, "mousemove");
+                refocusGame();
             }, false);
 
-            flashContainer.addEventListener("touchend", function(e) {
+            flashContainer.addEventListener("pointerup", function(e) {
                 e.preventDefault();
-                simulateMouseEvent(e.changedTouches[0], "mouseup");
-                simulateMouseEvent(e.changedTouches[0], "click"); // Assicura che il click venga registrato
+                console.log("Pointer up:", e.clientX, e.clientY);
+                simulateMouseEvent(e, "mouseup");
+                simulateMouseEvent(e, "click"); 
+                refocusGame();
             }, false);
 
-            function simulateMouseEvent(touch, eventType) {
-                const event = new MouseEvent(eventType, {
+            function simulateMouseEvent(event, eventType) {
+                console.log(`Simulating ${eventType} event at ${event.clientX}, ${event.clientY}`);
+                const simulatedEvent = new MouseEvent(eventType, {
                     bubbles: true,
                     cancelable: true,
                     view: window,
-                    clientX: touch.clientX,
-                    clientY: touch.clientY,
-                    button: 0 // Simula il click sinistro del mouse
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    button: 0 
                 });
-                document.elementFromPoint(touch.clientX, touch.clientY).dispatchEvent(event);
+                document.elementFromPoint(event.clientX, event.clientY).dispatchEvent(simulatedEvent);
             }
         };
     </script>
 </head>
 <body>
-    <div id="flash-container"></div>
+    <div id="flash-container" tabindex="0"></div>
 
     <div id="virtual-keyboard">
         <div id="arrow-left" class="arrow-key">←</div>
