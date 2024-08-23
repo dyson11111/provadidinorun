@@ -25,6 +25,7 @@
             align-items: center;
             width: 100%;
             height: 100%;
+            touch-action: none; /* Previene il comportamento di default del browser sul tocco */
         }
 
         #virtual-keyboard {
@@ -84,16 +85,74 @@
             player.load("dinorun.swf");
         });
 
-        function simulateKeyPress(keyCode) {
-            const event = new KeyboardEvent('keydown', { keyCode: keyCode, which: keyCode });
+        function simulateKeyEvent(type, keyCode) {
+            const event = new KeyboardEvent(type, {
+                keyCode: keyCode,
+                which: keyCode,
+                bubbles: true,
+                cancelable: true
+            });
             document.dispatchEvent(event);
         }
 
+        function convertTouchToMouseEvent(type, touch) {
+            const simulatedEvent = new MouseEvent(type, {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+                detail: 1,
+                screenX: touch.screenX,
+                screenY: touch.screenY,
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                ctrlKey: false,
+                altKey: false,
+                shiftKey: false,
+                metaKey: false,
+                button: 0,
+                relatedTarget: null
+            });
+
+            touch.target.dispatchEvent(simulatedEvent);
+        }
+
         window.onload = function() {
-            document.getElementById("arrow-up").addEventListener("touchstart", () => simulateKeyPress(38));
-            document.getElementById("arrow-left").addEventListener("touchstart", () => simulateKeyPress(37));
-            document.getElementById("arrow-right").addEventListener("touchstart", () => simulateKeyPress(39));
-            document.getElementById("arrow-down").addEventListener("touchstart", () => simulateKeyPress(40));
+            const arrowUp = document.getElementById("arrow-up");
+            const arrowLeft = document.getElementById("arrow-left");
+            const arrowRight = document.getElementById("arrow-right");
+            const arrowDown = document.getElementById("arrow-down");
+
+            arrowUp.addEventListener("touchstart", () => simulateKeyEvent('keydown', 38));
+            arrowUp.addEventListener("touchend", () => simulateKeyEvent('keyup', 38));
+
+            arrowLeft.addEventListener("touchstart", () => simulateKeyEvent('keydown', 37));
+            arrowLeft.addEventListener("touchend", () => simulateKeyEvent('keyup', 37));
+
+            arrowRight.addEventListener("touchstart", () => simulateKeyEvent('keydown', 39));
+            arrowRight.addEventListener("touchend", () => simulateKeyEvent('keyup', 39));
+
+            arrowDown.addEventListener("touchstart", () => simulateKeyEvent('keydown', 40));
+            arrowDown.addEventListener("touchend", () => simulateKeyEvent('keyup', 40));
+
+            const flashContainer = document.getElementById("flash-container");
+
+            flashContainer.addEventListener("touchstart", function(e) {
+                e.preventDefault(); // Previene il comportamento di default del browser
+                const touch = e.changedTouches[0];
+                convertTouchToMouseEvent("mousedown", touch);
+            }, false);
+
+            flashContainer.addEventListener("touchmove", function(e) {
+                e.preventDefault();
+                const touch = e.changedTouches[0];
+                convertTouchToMouseEvent("mousemove", touch);
+            }, false);
+
+            flashContainer.addEventListener("touchend", function(e) {
+                e.preventDefault();
+                const touch = e.changedTouches[0];
+                convertTouchToMouseEvent("mouseup", touch);
+            }, false);
         };
     </script>
 </head>
